@@ -6,4 +6,12 @@
 
 #define MYOS_TOTAL_INTERRUPTS 512
 
+//100mb heap size- could be determined with ram
+#define MYOS_HEAP_SIZE_BYTES 104857600
+#define MYOS_HEAP_BLOCK_SIZE 4096
+
+#define MYOS_HEAP_ADDRESS 0x01000000
+#define MYOS_HEAP_TABLE_ADDRESS 0X00007E00
+
+
 #endif
