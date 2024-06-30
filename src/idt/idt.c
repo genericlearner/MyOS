@@ -41,6 +41,7 @@ void idt_init()
     memoryset(idt_desc,0,sizeof(idt_desc));
     idtr_desc.limit =sizeof(idt_desc)-1;
     idtr_desc.base=(uint32_t)idt_desc;
+    
     for(int i=0;i<MYOS_TOTAL_INTERRUPTS;i++)
     {
         idt_set(i,no_interrupt);
