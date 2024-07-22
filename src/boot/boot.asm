@@ -23,6 +23,7 @@ step2:
     
     sti ;enables interrupts
    
+   ;Load protected mode
 .load_protected:
     cli 
     lgdt[gdt_descriptor]

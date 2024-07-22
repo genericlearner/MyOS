@@ -5,6 +5,9 @@
 #include "io/io.h"
 #include "memory/heap/kheap.h"
 #include "memory/paging/paging.h"
+#include "string/string.h"
+#include "disk/disk.h"
+#include "fs/pathparser.h"
 
 uint16_t* video_mem=0;
 uint16_t terminal_row=0;
@@ -48,15 +51,7 @@ void terminal_initialize()
     }
 }
 
-size_t strlen (const char* str)
-{
-    size_t len=0;
-    while(str[len])
-    {
-        len++;
-    }
-    return len;
-}
+
 
 void print(const char* str)
 {
@@ -77,12 +72,32 @@ void kernel_main()
 
     kheap_init();
 
+    //search and initialize disk
+    disk_search_and_initialize();
+
+
     idt_init();
+
     kernel_chunk=paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT|PAGING_ACCESS_FROM_ALL);
 
     paging_switch(paging_4gb_chunk_get_directory(kernel_chunk));
 
-    enable_paging();
+    
 
+    enable_paging();
+    
+    disk_get(0);
+     
     enable_interrupts();
+
+    struct path_root* root_path = pathparser_parse("0:/bin/shell.exe",NULL);
+    
+    if(root_path)
+    {
+        
+    }
+    
+    //This program initializes the terminal by cleaning it and allowing protocols. Moreover, it initializes the kernel heap, the idt Structure, the paging, 
+    //The paging switch, Then at last enable the interrupts. 
+    //Kernel chunk is the memory assigned for paging by the memory set.
 }

@@ -50,4 +50,5 @@ void idt_init()
     idt_set(0x20,int21h);
     //load the idt table
     idt_load(&idtr_desc);
+    
 }

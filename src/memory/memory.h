@@ -3,4 +3,8 @@
 #include <stddef.h>
 
 void* memoryset(void* ptr, int c, size_t size);
+
+int memorycmp(void* s1, void* s2, int count);
+
+
 #endif
