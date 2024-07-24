@@ -96,6 +96,10 @@ void kernel_main()
     {
         
     }
+    else 
+    {
+        print("Couldn't parse the input");
+    }
     
     //This program initializes the terminal by cleaning it and allowing protocols. Moreover, it initializes the kernel heap, the idt Structure, the paging, 
     //The paging switch, Then at last enable the interrupts. 

@@ -18,7 +18,7 @@ void no_interrupt_handler()
 
 void int21h_handler()
 {
-    print("Keyboard pressed\n");
+    //print("Keyboard pressed\n");
     outb(0x20,0x20);
 }
 
