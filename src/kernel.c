@@ -42,6 +42,8 @@ void terminal_writechar(char c, char colour)
 void terminal_initialize()
 {
     video_mem = (uint16_t*)(0xB8000);
+    terminal_col=0;
+    terminal_row=0;
     for(int x=0;x<VGA_HEIGHT;x++)
     {
         for(int y=0;y<VGA_WIDTH;y++)
@@ -86,7 +88,6 @@ void kernel_main()
 
     enable_paging();
     
-    disk_get(0);
      
     enable_interrupts();
 
@@ -96,10 +97,7 @@ void kernel_main()
     {
         
     }
-    else 
-    {
-        print("Couldn't parse the input");
-    }
+   
     
     //This program initializes the terminal by cleaning it and allowing protocols. Moreover, it initializes the kernel heap, the idt Structure, the paging, 
     //The paging switch, Then at last enable the interrupts. 

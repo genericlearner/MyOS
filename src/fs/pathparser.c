@@ -8,8 +8,24 @@
 
 static int path_validate_format(const char* filename)
 {
+    if(filename==NULL)
+    {
+        
+        return 0;
+    }
     int length=strnlen(filename, MYOS_MAX_PATH);
-    return (length>=3 && isdigit(filename[0])&&memorycmp((void*)&filename[1],":/",2)==0);
+
+    if(length < 3)
+    {
+        
+        return 0;
+    }
+    if(!isdigit(filename[0]))
+    {
+       
+        return 0;
+    }
+    return (memorycmp((void*) & filename[1],":/",2) == 0);
 }
 
 //The function below makes 0:/test.txt to test.txt
@@ -17,6 +33,7 @@ static int path_get_drive_by_path(const char** path)
 {
     if(!path_validate_format(*path))
     {
+        
         return -EBADPATH;
     }
     int drive_no = chartonum(*path[0]);
@@ -62,14 +79,14 @@ static const char* get_path_part(const char** path)
 
 struct path_part* parse_path_part(struct path_part* last_part, const char** path)
 {
-    const char* path_aprt_str = get_path_part(path);
-    if(!path_aprt_str)
+    const char* path_part_str = get_path_part(path);
+    if(!path_part_str)
     {
         return 0;
     }
 
     struct path_part* part=kzalloc(sizeof(struct path_part));
-    part->part=path_aprt_str;
+    part->part=path_part_str;
     part->next=0x00;
 
     if(last_part)
@@ -99,11 +116,15 @@ struct path_root* pathparser_parse(const char* path, const char* current_directo
     int res=0;
     const char* temp_path=path;
     struct path_root* path_root=0;
+
     if(strlen(path)>MYOS_MAX_PATH)
     {
         goto out;
     }
+
     res= path_get_drive_by_path(&temp_path);
+   
+   
     if(res<0)
     {
         goto out;
@@ -112,6 +133,7 @@ struct path_root* pathparser_parse(const char* path, const char* current_directo
     path_root = create_root(res);
     if(!path_root)
     {
+     
         goto out;
     }
     struct path_part* first_part=parse_path_part(NULL, &temp_path);

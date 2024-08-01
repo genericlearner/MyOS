@@ -7,18 +7,17 @@ int strlen(const char* ptr)
     while(*ptr!=0)
     {
         i++;
-        ptr++;
+        ptr+=1;
     }
     return i;
 }
 
 int strnlen(const char* ptr, int max)
 {
-    int i=0;
-    for(int i=0;i<max;i++)
+   int i;
+    for (i = 0; i < max && ptr[i] != '\0'; i++)
     {
-        if(ptr[i]==0)
-        break;
+        // Loop continues while `i` is less than `max` and `ptr[i]` is not the null terminator
     }
     return i;
 }
