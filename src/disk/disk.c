@@ -50,7 +50,7 @@ struct disk* disk_get(int index)
     return &disk;
 }
 
-int disk_read_read_block(struct disk* idisk, unsigned int lba, int total, void* buff)
+int disk_read_block(struct disk* idisk, unsigned int lba, int total, void* buff)
 {
     if(idisk!=&disk)
     {
