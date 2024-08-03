@@ -41,6 +41,7 @@ void disk_search_and_initialize()
     memoryset(&disk,0,sizeof(disk));
     disk.type= MYOS_DISK_TYPE_REAL;
     disk.sector_size= MYOS_SECTOR_SIZE;
+    disk.filesystem = fs_resolve(&disk);
 }
 
 struct disk* disk_get(int index)
