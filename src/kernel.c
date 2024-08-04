@@ -8,6 +8,7 @@
 #include "string/string.h"
 #include "disk/disk.h"
 #include "fs/pathparser.h"
+#include "fs/file.h"
 #include "disk/diskstreamer.h"
 
 
@@ -75,12 +76,14 @@ void kernel_main()
     print("Hello\nWorld");
 
     kheap_init();
-
+    fs_init();
     //search and initialize disk
     disk_search_and_initialize();
 
 
     idt_init();
+
+
 
     kernel_chunk=paging_new_4gb(PAGING_IS_WRITEABLE | PAGING_IS_PRESENT|PAGING_ACCESS_FROM_ALL);
 
