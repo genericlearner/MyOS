@@ -1,6 +1,6 @@
 #include "string.h"
 
-
+//calculates the string length
 int strlen(const char* ptr)
 {
     int i=0;
@@ -12,6 +12,7 @@ int strlen(const char* ptr)
     return i;
 }
 
+//Calculates the max string length?
 int strnlen(const char* ptr, int max)
 {
    int i;
@@ -22,6 +23,8 @@ int strnlen(const char* ptr, int max)
     return i;
 }
 
+
+//This function checks if the given char is a digit
 bool isdigit(char c)
 {
     return c>=48 && c<=57;
@@ -34,6 +37,7 @@ int chartonum(char c)
     return c-48;
 }
 
+//String copy function
 char* strcpy(char* dest, const char* src)
 {
     char* res=dest;

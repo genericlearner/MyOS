@@ -77,6 +77,8 @@ static const char* get_path_part(const char** path)
     return path_part;
 }
 
+
+//The parse_path_part function takes in the last_part and path to 
 struct path_part* parse_path_part(struct path_part* last_part, const char** path)
 {
     const char* path_part_str = get_path_part(path);
