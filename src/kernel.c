@@ -79,7 +79,7 @@ void kernel_main()
     fs_init();
     //search and initialize disk
     disk_search_and_initialize();
-
+    
 
     idt_init();
 
