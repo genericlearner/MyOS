@@ -146,11 +146,25 @@ struct filesystem* fat16_init()
     strcpy(fat16_fs.name,"FAT16");
     return &fat16_fs;
 }
+static void fat16_init_private(struct disk *disk, struct fat_private *private)
+{
+    memset(private, 0, sizeof(struct fat_private));
+private
+    ->cluster_read_stream = diskstreamer_new(disk->id);
+private
+    ->fat_read_stream = diskstreamer_new(disk->id);
+private
+    ->directory_stream = diskstreamer_new(disk->id);
+}
 
+int fat16_sector_to_absolute(struct disk *disk, int sector)
+{
+    return sector * disk->sector_size;
+}
 //fat16 resolve function returns EIO for now
 int fat16_resolve(struct disk* disk)
 {
-    return 0;
+    
 }
 //
 void* fat16_open(struct disk* disk, struct path_part* path, FILE_MODE mode)
