@@ -4,6 +4,8 @@
 #include "disk/diskstreamer.h"
 #include "string/string.h"
 #include "memory/heap/kheap.h"
+#include "kernel.h"
+#include "config.h"
 #include "memory/memory.h"
 #include <stdint.h>
 
@@ -110,7 +112,7 @@ struct fat_item
     FAT_ITEM_TYPE type;
 };
 
-struct fat_item_descriptor
+struct fat_file_descriptor
 {
     struct fat_item* item;
     uint32_t pos;
@@ -304,8 +306,167 @@ out:
     }
     return res;
 }
+
+void fat16_to_proper_string(char** out, const char* in )
+{
+    while(*in != 0x00 ||  *in != 0x20)
+    {
+        **out = *in;
+        *out += 1;
+        in +=1;
+    }
+    if(*in == 0x20)
+    {
+        **out = 0x00;
+    }
+}
+
+void fat16_get_full_relative_filename(struct fat_directory_item* item, char* out, int max_len)
+{
+    memoryset(out, 0x00, max_len);
+    char*out_tmp = out;
+    fat16_to_proper_string(&out_tmp, (const char*)item->filename);
+    if(item->ext[0] != 0x00 && item->ext[0] != 0x20)
+    {
+        *out_tmp++ = '.';
+        fat16_to_proper_string(&out_tmp, (const char*)item->ext);
+        
+    }
+
+
+}
+struct fat_directory_item* fat16_clone_directory_item(struct fat_directory_item* item, int size)
+{   struct fat_directory_item* new_item = 0;
+    if(size < sizeof(struct fat_directory_item))
+    {
+        return 0;
+    }
+     new_item= kzalloc(size);
+    if(!new_item)
+    {
+        return 0;
+    }
+    memorycopy(new_item, item, size);
+    return new_item;
+}
+
+struct fat_directory* fat16_load_fat_directory(struct disk* disk, struct fat_directory_item* item)
+{
+    int res =0;
+    struct fat_directory* directory = 0;
+    struct fat_private* fat_private = disk->fs_private;;
+    if(!(item->attribute & FAT_FILE_SUBDIRECTORY))
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    directory = kzalloc(sizeof(struct fat_directory));;
+    if(!directory)
+    {
+        res = -ENOMEM;
+        goto out;
+    }
+    int cluster = fat16_get_first_cluster(item);
+    int cluster_sector = fat16_cluster_to_sector(disk, cluster);
+    int total_items = fat16_get_total_items_for_directory(disk, cluster_sector);
+    directory->total = total_items;
+    int directory_size = total_items * sizeof(struct fat_directory_item);
+    directory->item = kzalloc(directory_size);
+    if(!directory->item)
+    {
+        res = -ENOMEM;
+        goto out;
+    }
+    res = fat16_read_internal(disk, cluster, 0x00, directory_size, directory->item);
+    if(res != MYOS_ALL_OK)
+    {
+        goto out;
+    }
+
+out:
+   if (res != MYOS_ALL_OK)
+   {
+       fat16_free_directory(directory);
+   }
+}
+
+struct fat_item* fat16_new_fat_item_for_directory_item(struct disk* disk, struct fat_directory_item* item)
+{
+    struct fat_item* f_item = kzalloc(sizeof(struct fat_item));
+    if(!f_item)
+    {
+        return 0;
+    }
+    if(item->attribute & FAT_FILE_SUBDIRECTORY)
+    {
+        f_item->directory = fat16_load_fat_directory(disk, item);
+        f_item->type = FAT_ITEM_TYPE_DIRECTORY;
+    }
+
+    f_item->type = FAT_ITEM_TYPE_FILE;
+    f_item->item = fat16_clone_directory_item(item, sizeof(struct fat_directory_item));
+
+    return f_item;
+    
+    
+}
+struct fat_itme* fat16_find_item_in_directory(struct disk* disk, struct fat_directory* directory, const char* name)
+{
+    struct fat_item* f_item = 0;
+    char tmp_filename[MYOS_MAX_PATH];
+
+    for(int i =0;i<directory->total;i++)
+    {
+        fat16_get_full_relative_filename(&directory->item[i], tmp_filename, sizeof(tmp_filename));
+
+        if(istrncmp(tmp_filename, name, sizeof(tmp_filename))==0)
+        {
+            f_item = fat16_new_fat_item_for_directory_item(disk, &directory->item[i]);
+        }
+    }
+    return f_item;
+}
+
+struct fat_item* fat16_get_directory_entry(struct disk* disk, struct path_part* path)
+{
+    struct fat_private* fat_private = disk->fs_private;
+    struct fat_item* current_item = 0;
+    struct fat_item* root_item
+     = fat16_find_item_in_directory(disk, &fat_private->root_directory, path->part);
+    if(!root_item)
+    {
+        goto out;
+
+    }
+
+out:
+    return current_item;
+}
 //
 void* fat16_open(struct disk* disk, struct path_part* path, FILE_MODE mode)
 {
-    return 0;
+    if(mode != FILE_MODE_READ)
+    {
+        return ERROR(-ERDONLY);
+    }
+
+    struct fat_file_descriptor* descriptor = kzalloc(sizeof(struct fat_file_descriptor));
+
+    if(!descriptor)
+    {
+        return ERROR(-ENOMEM);
+    }
+
+    descriptor->item = fat16_get_directory_entry(disk, path);
+
+    if(!descriptor->item)
+    {
+        
+        return ERROR(-EIO);
+    }
+
+    descriptor->pos = 0;
+
+    return descriptor;
 }

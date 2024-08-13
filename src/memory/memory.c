@@ -24,3 +24,14 @@ int memorycmp(void* s1, void* s2, int count)
     return 0;
 
 }
+
+void* memorycopy(void* dest, const void* src, int size)
+{
+    char* c_dest = dest;
+    char* c_src = src;
+    for(int i=0;i<size;i++)
+    {
+        *c_dest++ = *c_src++;
+    }
+    return dest;
+}
