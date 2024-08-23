@@ -65,7 +65,11 @@ void fs_init()
     memoryset(file_descriptors, 0, sizeof(file_descriptors));
     fs_load();
 }
-
+static void file_free_descriptor(struct file_descriptor* desc)
+{
+    file_descriptors[desc->index-1] = 0x00;
+    kfree(desc);
+}
 //The function searches the array of file descriptors to allocate and assigns memory from the kernel memory
 //Then it assigns the index for the file descriptor 
 static int file_new_descriptor(struct file_descriptor** desc_out)
@@ -166,7 +170,7 @@ int fopen(const char* filename, const char* mode_str)
     }
 
     FILE_MODE mode = file_get_mode_by_string(mode_str);
-    if(!mode)
+    if(mode == FILE_MODE_INVALID)
     {
         res = -EINVARG;
         goto out;
@@ -195,5 +199,60 @@ out:
     if(res < 0)
         res = 0;
         
+    return res;
+}
+
+
+int fclose(int fd)
+{
+    int res = 0;
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!desc)
+    {
+        res = -EIO;
+        goto out;
+    }
+
+    res = desc->filesystem->close(desc->private);
+    if (res == MYOS_ALL_OK)
+    {
+        file_free_descriptor(desc);
+    }
+out:
+    return res;
+}
+
+int fseek(int fd, int offset, FILE_SEEK_MODE whence)
+{
+    int res = 0;
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!desc)
+    {
+        res = -EIO;
+        goto out;
+    }
+
+    res = desc->filesystem->seek(desc->private, offset, whence);
+out:
+    return res;
+}
+int fread(void* ptr, uint32_t size, uint32_t nmemb, int fd)
+{
+    int res = 0;
+    if (size == 0 || nmemb == 0 || fd < 1)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    struct file_descriptor* desc = file_get_descriptor(fd);
+    if (!desc)
+    {
+        res = -EINVARG;
+        goto out;
+    }
+
+    res = desc->filesystem->read(desc->disk, desc->private, size, nmemb, (char*) ptr);
+out:
     return res;
 }

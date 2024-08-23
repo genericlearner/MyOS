@@ -1,7 +1,7 @@
 #include "diskstreamer.h"
 #include "memory/heap/kheap.h"
 #include "config.h"
-
+#include <stdbool.h>
 //initializing a disk streamer
 struct disk_stream* diskstreamer_new(int disk_id)
 {
@@ -29,15 +29,21 @@ int diskstreamer_read(struct disk_stream* stream, void* out, int total)
 {
     int sector = stream->pos / MYOS_SECTOR_SIZE;
     int offset = stream->pos % MYOS_SECTOR_SIZE;
+    int total_read = total;
+    bool overflow = (offset + total) >= MYOS_SECTOR_SIZE;
     char buf[MYOS_SECTOR_SIZE];
+
+    if(overflow)
+    {
+        total_read -=(offset + total_read) - MYOS_SECTOR_SIZE;
+    }
 
     int res = disk_read_block(stream->disk,sector,1,buf);
     if(res<0)
     {
         goto out;
     }
-    //if the total provided is greater than sector size, use sector size. Else use total 
-    int total_read = total > MYOS_SECTOR_SIZE ? MYOS_SECTOR_SIZE : total;
+    
     for(int i=0; i <total_read; i++)
     {
         *(char*)out++ = buf[offset+i];
@@ -46,7 +52,7 @@ int diskstreamer_read(struct disk_stream* stream, void* out, int total)
 
     stream->pos += total_read;
     
-    if(total>MYOS_SECTOR_SIZE)
+    if(overflow)
     {
         res=diskstreamer_read(stream, out, total-MYOS_SECTOR_SIZE);
     }

@@ -25,7 +25,7 @@ int memorycmp(void* s1, void* s2, int count)
 
 }
 
-void* memorycopy(void* dest, const void* src, int size)
+void* memorycopy(void* dest, void* src, int size)
 {
     char* c_dest = dest;
     char* c_src = src;
