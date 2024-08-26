@@ -101,10 +101,7 @@ void kernel_main()
     {
        
         print("\nWe opened hello.txt\n");
-        char buf[13];
-        fread(buf, 13, 1, fd);
-        buf[13] = 0x00;
-        print(buf);
+        
     }
     while(1){}
    
