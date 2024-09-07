@@ -1,7 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 #include "config.h"
-#include "paging/paging.h"
+#include "memory/paging/paging.h"
 
 struct registers{
     uint32_t edi;
@@ -18,4 +18,20 @@ struct registers{
     uint32_t esp;
     uint32_t ss;
 };
+
+struct task{
+    struct paging_4gb_chunk* page_directory;
+    struct registers registers;
+
+    struct task* next;
+    struct task* prev;
+
+
+};
+
+struct task* task_new();
+struct task* task_current();
+struct task* task_get_next();
+int task_free(struct task* task);
+
 #endif

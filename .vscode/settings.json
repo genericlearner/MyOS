@@ -2,6 +2,7 @@
     "files.associations": {
         "stddef.h": "c",
         "idt.h": "c",
-        "pparser.h": "c"
+        "pparser.h": "c",
+        "memory.h": "c"
     }
 }
