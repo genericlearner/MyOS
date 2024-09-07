@@ -87,6 +87,33 @@ int task_free(struct task* task)
     kfree(task);
     return MYOS_ALL_OK;
 }
+
+int task_switch(struct task* task)
+{
+    if (!task)
+    {
+        return -EINVARG;
+    }
+    current_task = task;
+    paging_switch(task->page_directory->directory_entry);
+    return MYOS_ALL_OK;
+}
+
+int task_page(){
+    user_registers();
+    task_switch(current_task);
+    return MYOS_ALL_OK;
+}
+
+void task_run_frist_ever_task(){
+    if(current_task){
+        panic("no current task");
+    }
+    task_switch(task_head);
+    task_return(&task_head->registers);
+}
+
+
 int task_init(struct task* task, struct process* process)
 {
     memset(task, 0, sizeof(struct task));
