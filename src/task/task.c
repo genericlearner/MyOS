@@ -3,14 +3,15 @@
 #include "memory/heap/kheap.h"
 #include "status.h"
 #include "kernel.h"
+#include "process.h"
 struct task* current_task = 0;
 struct task* task_tail = 0;
 struct task* task_head = 0;
-int task_init(struct task* task);
+int task_init(struct task* task, struct process* process);
 struct task* task_current(){
     return current_task;
 }
-struct task* task_new(){
+struct task* task_new(struct process* process){
     int res =0;
     struct task* task = kzalloc(sizeof(struct task));
     if (!task)
@@ -18,7 +19,7 @@ struct task* task_new(){
         res = -ENOMEM;
         goto out;
     }
-    res = task_init(task);
+    res = task_init(task, process);
     if(res != MYOS_ALL_OK)
     {
         goto out;
@@ -86,7 +87,7 @@ int task_free(struct task* task)
     kfree(task);
     return MYOS_ALL_OK;
 }
-int task_init(struct task* task)
+int task_init(struct task* task, struct process* process)
 {
     memset(task, 0, sizeof(struct task));
 
@@ -99,5 +100,6 @@ int task_init(struct task* task)
     task->registers.ss = USER_DATA_SEGMENT;
     task->registers.esp = MYOS_PROGRAM_VIRTUAL_STACK_ADDRESS_START;
 
+    task->process = process;
     return 0;
 }

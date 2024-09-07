@@ -19,17 +19,19 @@ struct registers{
     uint32_t ss;
 };
 
+//process structure
+struct process ;
+
 struct task{
     struct paging_4gb_chunk* page_directory;
     struct registers registers;
-
+    struct process* process;
     struct task* next;
     struct task* prev;
 
 
 };
-
-struct task* task_new();
+struct task* task_new(struct process* process);
 struct task* task_current();
 struct task* task_get_next();
 int task_free(struct task* task);

@@ -25,9 +25,12 @@ struct paging_4gb_chunk* paging_new_4gb(uint8_t flags);
 void paging_switch(uint32_t* directory);
 void enable_paging();
 void paging_free_4gb(struct paging_4gb_chunk* chunk);
-
+void* paging_align_address(void* addr);
 int paging_set(uint32_t* directory, void* virt, uint32_t val);
 bool paging_is_aligned(void* addr);
+int paging_map_to(uint32_t* directory, void* virt, void* phys, void* phys_end, int flags);
+int paging_map_range(uint32_t* directory, void* virt, void* phys, int total_pages, int flags);
+int paging_map(uint32_t* directory, void* virt, void* phys, int flags);
 
 uint32_t* paging_4gb_chunk_get_directory(struct paging_4gb_chunk* chunk);
 
