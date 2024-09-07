@@ -8,7 +8,10 @@
 #include "fs/file.h"
 #include "disk/disk.h"
 #include "fs/pparser.h"
+#include "gdt/gdt.h"
+#include "memory/memory.h"
 #include "disk/streamer.h"
+#include "config.h"
 
 uint16_t* video_mem = 0;
 uint16_t terminal_row = 0;
@@ -74,12 +77,25 @@ void panic(const char* msg)
     print(msg);
     while(1) {}
 }
+struct gdt gdt_real[MYOS_TOTAL_GDT_SEGMENTS];
+struct gdt_structured gdt_structured[MYOS_TOTAL_GDT_SEGMENTS] ={
+    {.base = 0x00, .limit = 0x00, .type = 0x00}, //NULL segments
+    {.base = 0x00, .limit = 0xFFFFFFFF, .type = 0x9A}, //Kernel code
+    {.base = 0x00, .limit = 0xFFFFFFFF, .type = 0x92}, //Kernel data
+   // {.base = 0x00, .limit = 0xFFFFFFFF, .type = 0xFA}, //User code
+    //{.base = 0x00, .limit = 0xFFFFFFFF, .type = 0xF2}, //User data
+    //{.base = 0x00, .limit = 0xFFFFFFFF, .type = 0xF2}, //TSS
 
+};
 void kernel_main()
 {
     terminal_initialize();
     print("Hello world!\ntest");
 
+    memset(gdt_real, 0, sizeof(gdt_real));
+    gdt_structured_to_gdt(gdt_real, gdt_structured, MYOS_TOTAL_GDT_SEGMENTS);
+    //LOAD GDT 
+    gdt_load(gdt_real, sizeof(gdt_real));
     // Initialize the heap
     kheap_init();
 
