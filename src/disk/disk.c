@@ -36,9 +36,9 @@ int disk_read_sector(int lba, int total, void* buf)
     return 0;
 }
 
-void disk_search_and_initialize()
+void disk_search_and_init()
 {
-    memoryset(&disk, 0, sizeof(disk));
+    memset(&disk, 0, sizeof(disk));
     disk.type = MYOS_DISK_TYPE_REAL;
     disk.sector_size = MYOS_SECTOR_SIZE;
     disk.id = 0;
